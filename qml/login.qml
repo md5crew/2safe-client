@@ -82,7 +82,7 @@ Item {
             }
             Button {
                 Layout.alignment: Qt.AlignHCenter
-                // onClicked: XXX
+                onClicked: Qt.quit()
                 style: ButtonStyle {
                     label: Text {
                         text: "Sign In"

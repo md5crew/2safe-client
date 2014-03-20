@@ -21,20 +21,41 @@ int main(int argc, char *argv[])
 
     TrayIcon icon;
     QObject::connect(&icon, &TrayIcon::quit, &cli, &SafeClient::stop);
+    QObject::connect(&icon, &TrayIcon::logout, &cli, &SafeClient::logOut);
+    QObject::connect(&icon, &TrayIcon::chdir, &cli, &SafeClient::chdir);
 
     QQuickView view;
-    QObject::connect(&view, SIGNAL(closing(QQuickCloseEvent*)), &cli, SLOT(stop()));
+    QObject::connect(view.engine(), &QQmlEngine::quit, &view, &QQuickView::close);
+    //QObject::connect(&view, SIGNAL(closing(QQuickCloseEvent*)), &cli, SLOT(stop()));
     view.engine()->rootContext()->setContextProperty("homepath", QDir::homePath());
 
     QObject::connect(&cli, &SafeClient::stateChanged, [&](){
+        if (cli.state() == SafeClient::Idle) {
+            icon.showMessage("2Safe", "Files have been synced");
+        } else if (cli.state() == SafeClient::Sync) {
+            icon.showMessage("2Safe", "Begin syncing files");
+        } else if (cli.state() == SafeClient::Unauthorized) {
+            icon.showMessage("2Safe", "Client deauthorized");
+        } else {
+            icon.showMessage("2Safe", "Daemon offline");
+        }
+    });
+
+    QObject::connect(&cli, &SafeClient::updateIcon, [&](){
         updateIcon(cli, &icon);
+    });
+    QObject::connect(&cli, &SafeClient::showLogin, [&](){
+        showLoginDialog(view);
+    });
+    QObject::connect(&cli, &SafeClient::showHome, [&](){
+        showRootDirChooseDialog(view);
+    });
+    QObject::connect(&cli, &SafeClient::hideAll, [&](){
+        view.hide();
     });
     QObject::connect(&cli, &SafeClient::quit, &a, &QApplication::quit);
 
-//    showLoginDialog(view);
-//    showRootDirChooseDialog(view);
     cli.monitor();
-
     return 0;
 }
 
@@ -61,8 +82,8 @@ void showRootDirChooseDialog(QQuickView &view) {
 }
 
 void updateIcon(const SafeClient& cli, TrayIcon *icon) {
-    icon->setAccount("");
-    icon->setUsage("");
-    icon->setAction("");
+    icon->setAccount(cli.account);
+    icon->setUsage(cli.usage);
+    icon->setAction(cli.action);
 }
 

@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <QSystemTrayIcon>
 #include <QMenu>
+#include <QDesktopServices>
+#include <QUrl>
+#include "safeclient.h"
 
 class TrayIcon : public QObject
 {
@@ -24,6 +27,8 @@ private:
 
 signals:
     void quit();
+    void logout();
+    void chdir();
 
 public slots:
     void showMessage(QString title, QString text);

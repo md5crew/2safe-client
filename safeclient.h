@@ -11,6 +11,10 @@
 #include <QDir>
 #include <QDebug>
 #include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonArray>
+#include <QDateTime>
 
 class SafeClient : public QObject
 {
@@ -25,6 +29,10 @@ public:
 
     explicit SafeClient(QObject *parent = 0);
     State state(){ return this->m_state; }
+    bool auth;
+    QString account;
+    QString usage;
+    QString action;
     void monitor();
 
 private:
@@ -43,10 +51,24 @@ private:
     }
 
 signals:
+    void updateIcon();
     void stateChanged();
+    void showLogin();
+    void showHome();
+    void hideAll();
     void quit();
 
+
+private slots:
+    void handleMessage(const QJsonObject &obj);
+    void sendCommand(const QJsonObject &obj);
+
+
 public slots:
+    void logOut();
+    void changeDir(const QString &dir);
+    void logIn(const QString &login, const QString &password);
+    void chdir();
     void stop();
 
 };

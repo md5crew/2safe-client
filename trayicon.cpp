@@ -66,13 +66,33 @@ QMenu* TrayIcon::makeMenu()
     menu->addAction(a);
     menu->addSeparator();
 
-    a = new QAction("Don't click me!", menu);
+
+   // a = new QAction("Open folder", menu);
+   // menu->addAction(a);
+
+    a = new QAction("Open website", menu);
+    connect(a, &QAction::triggered, [](){
+        QDesktopServices::openUrl(QUrl("https://www.2safe.com/web/"));
+    });
     menu->addAction(a);
 
     menu->addSeparator();
+    a = new QAction("Switch user", menu);
+    connect(a, &QAction::triggered, [&](){
+        emit logout();
+    });
+
+    menu->addAction(a);
+    a = new QAction("Change folder", menu);
+    connect(a, &QAction::triggered, [&](){
+        emit chdir();
+    });
+    menu->addAction(a);
+    menu->addSeparator();
+
     a = new QAction("Exit", menu);
     connect(a, &QAction::triggered, [&](){
-        emit this->quit();
+        emit quit();
     });
     menu->addAction(a);
 
